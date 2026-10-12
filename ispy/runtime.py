@@ -611,9 +611,20 @@ class Runtime:
             if not b:
                 continue
             x, y = pos[0] - b[0], pos[1] - b[1]
-            if 0 <= x < b[2] and 0 <= y < b[3]:
-                # bounding-box hit test (Director behaviour): transparent pixels still count
-                return chan, s
+            if not (0 <= x < b[2] and 0 <= y < b[3]):
+                continue
+            img = b[4]
+            # Pixel-accurate test for image sprites: skip a sprite whose pixel under the cursor is
+            # transparent, so an overlapping higher-channel sprite no longer steals clicks in its
+            # empty corners (the SS "YUM" etchings and the lizard tails both hit this).
+            # Fields / stretched sprites / Mask-ink sprites have img=None and stay box-only.
+            if img is not None:
+                try:
+                    if img.get_at((int(x), int(y))).a == 0:
+                        continue
+                except Exception:
+                    pass
+            return chan, s
         return None, None
 
     def draw_text(self, s):
