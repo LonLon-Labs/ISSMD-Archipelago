@@ -191,7 +191,9 @@ def pyinstaller(py, onefile, icon, ffmpeg):
            "--distpath", dist, "--workpath", WORK / "pyi-build", "--specpath", WORK,
            "--paths", ROOT,
            "--onefile" if onefile else "--onedir",
-           "--collect-submodules", "ispy", "--collect-submodules", "launcher", "--collect-submodules", "dirtools",
+           "--collect-submodules", "ispy", "--collect-submodules", "ispy.ap", "--collect-submodules", "launcher",
+           "--collect-submodules", "dirtools",
+           "--collect-data", "ispy.ap",                          # riddle_clues.json lives inside the package
            "--collect-data", "pygame", "--collect-binaries", "pygame",
            "--add-data", "%s%stools" % (ROOT / "tools" / "convert_data.py", sep),
            "--add-data", "%s%stools" % (ROOT / "tools" / "lingo_data.py", sep),
@@ -200,6 +202,8 @@ def pyinstaller(py, onefile, icon, ffmpeg):
         cmd.append("--windowed")                                 # no console window behind the GUI
     if HOST == "macos":
         cmd += ["--osx-bundle-identifier", BUNDLE_ID]
+    if (ROOT / "AP Menu").is_dir():                            # Archipelago menu art (+ optional you_found_me sound)
+        cmd += ["--add-data", "%s%sAP Menu" % (ROOT / "AP Menu", sep)]
     if ffmpeg:
         cmd += ["--add-binary", "%s%sffmpeg" % (ffmpeg, sep)]
     if (ROOT / "ispy" / "icon.png").is_file():                  # window/taskbar icon (tools/extract_icon.py)

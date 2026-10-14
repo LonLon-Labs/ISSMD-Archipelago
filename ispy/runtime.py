@@ -221,6 +221,12 @@ class Runtime:
         self.update_list = []
 
     def tick(self):
+        hook = getattr(self, 'ap_tick', None)      # Archipelago pump; set by ispy.ap.hooks
+        if hook is not None:
+            try:
+                hook()
+            except Exception:                      # noqa: BLE001
+                self.ap_tick = None
         for o in list(self.update_list):          # call(#mUpdate, gUpdateList)
             if o in self.update_list:
                 o.mUpdate()
@@ -375,7 +381,7 @@ class Runtime:
         if os.name == 'nt':
             try:
                 import ctypes
-                ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID('ISpySpookyMansionPort.Game')
+                ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID('ISpySpookyMansionArchipelago.Game')
             except Exception:
                 pass
         try:
@@ -408,7 +414,7 @@ class Runtime:
         except Exception as e:
             print('resizable window unavailable (%s); using a fixed 640x480 window' % e)
             self.screen = pygame.display.set_mode((self.STAGE_W, self.STAGE_H))
-        pygame.display.set_caption('I SPY Spooky Mansion Deluxe (Python Port)')
+        pygame.display.set_caption('I SPY Spooky Mansion Deluxe Archipelago')
         try:
             from .icon_data import load_icon_surface      # the original icon, read from spooky2.exe
             icon = load_icon_surface(pygame, self.exports_root, self.game_root, self.project_root)
@@ -673,6 +679,12 @@ class Runtime:
         v = getattr(self, 'video', None)           # Bink video plays over the stage
         if v is not None and v.frame is not None:
             self.screen.blit(v.frame, v.pos)
+        hook = getattr(self, 'ap_draw', None)      # Archipelago overlay (toasts / locked box); set by ispy.ap.hooks
+        if hook is not None:
+            try:
+                hook(self.screen)
+            except Exception:                      # noqa: BLE001  never let the overlay break rendering
+                self.ap_draw = None
         self._pg.display.flip()
 
     def _draw_noink(self):

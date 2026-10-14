@@ -1,7 +1,6 @@
-# I Spy Spooky Mansion Deluxe: Python port
+# I Spy Spooky Mansion Deluxe Archipelago
 
-A 1:1 port of the decompiled Lingo (Director 8.5) to Python + pygame. Parent scripts keep their
-Lingo names (`mInit`, `mShow`, `mPlayDone`, ...) so each Python class can be diffed against its `.ls`.
+An Archipelago integration of the python port of I Spy Spooky Mansion Deluxe.
 
 ## Run
 
@@ -17,12 +16,7 @@ The game will automatically start.
 pip install pygame
 python -m launcher
 ```
-Saves go to `%LOCALAPPDATA%\ISpySpookyMansionPort\SAVED GAMES\<player>\`.
-
-## Status
-Full game can and has been completed (in world record time).
-
-
+Saves go to `%LOCALAPPDATA%\ISpySpookyMansionArchipelago\SAVED GAMES\<player>\`.
 
 
 ## Legal Disclaimer

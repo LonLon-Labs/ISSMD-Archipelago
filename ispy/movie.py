@@ -383,7 +383,7 @@ def doshutDown():
 
 # ---- INIT_MAIN -------------------------------------------------------------------------------
 def _saved_games_dir(project_root):
-    """Per-user save folder, under the same root the launcher uses: %LOCALAPPDATA%\\ISpySpookyMansionPort\\SAVED GAMES
+    """Per-user save folder, under the same root the launcher uses: %LOCALAPPDATA%\\ISpySpookyMansionArchipelago\\SAVED GAMES
     (ISPY_PORT_HOME overrides the root; XDG data dir on non-Windows). Saves from the old in-project 'SAVED GAMES'
     folder are copied over the first time (the old folder is left alone)."""
     root = os.environ.get('ISPY_PORT_HOME')
@@ -392,7 +392,7 @@ def _saved_games_dir(project_root):
             base = os.environ.get('LOCALAPPDATA') or os.path.join(os.path.expanduser('~'), 'AppData', 'Local')
         else:
             base = os.environ.get('XDG_DATA_HOME') or os.path.join(os.path.expanduser('~'), '.local', 'share')
-        root = os.path.join(base, 'ISpySpookyMansionPort')
+        root = os.path.join(base, 'ISpySpookyMansionArchipelago')
     new = os.path.join(root, 'SAVED GAMES')
     old = os.path.join(project_root, 'SAVED GAMES')
     if not os.path.isdir(new) and os.path.isdir(old):

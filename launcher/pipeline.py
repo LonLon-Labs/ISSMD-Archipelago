@@ -69,15 +69,18 @@ def _game_files_ok(paths):
 
 
 def rip_valid(paths, st, fingerprint):
-    return (bool(fingerprint)
-            and state.stage_sig(st, "rip") == _rip_sig(paths, fingerprint)
-            and not ripper.verify_exports(paths.exports)
-            and _game_files_ok(paths))
+    """The exported files are usable. Judged by what is actually on disk, NOT by version stamps or tool signatures:
+    those change with every launcher update, and re-ripping would force the user to find their disc again.
+    Only a different disc than the one recorded (when a disc is supplied) invalidates the export."""
+    saved = st.get("fingerprint")
+    if fingerprint and saved and fingerprint != saved:
+        return False
+    return not ripper.verify_exports(paths.exports) and _game_files_ok(paths)
 
 
 def needs_disc(paths, st=None):
     st = st if st is not None else state.load(paths)
-    return not (state.stamp_ok(st) and rip_valid(paths, st, st.get("fingerprint")))
+    return not rip_valid(paths, st, None)
 
 
 def is_ready(paths):
@@ -100,7 +103,8 @@ def run_setup(paths, disc_path, rep, cancel=None, ripper_dir=None, log=print):
     paths.ensure()
     st = state.load(paths)
     if not state.stamp_ok(st):
-        st = {"stamp_version": STAMP_VERSION}
+        # New launcher version: drop the stage signatures (so convert re-runs) but keep what identifies the old export.
+        st = {"stamp_version": STAMP_VERSION, "fingerprint": st.get("fingerprint")}
 
     rep.begin("check")
     source = report = None
@@ -126,6 +130,7 @@ def run_setup(paths, disc_path, rep, cancel=None, ripper_dir=None, log=print):
 
         # ---- extract / tools / rip: skipped entirely when already valid for this disc ----
         if rip_valid(paths, st, fingerprint):
+            state.mark(st, "rip", _rip_sig(paths, fingerprint))
             for k in ("extract", "tools", "rip"):
                 rep.begin(k)
                 rep.done(k, "Already done")

@@ -1,10 +1,10 @@
 # ============================================================================================
-# I SPY Spooky Mansion Deluxe port -- keep everything that comes FROM the game out of the repo.
+# I SPY Spooky Mansion Deluxe Archipelago -- keep everything that comes FROM the game out of the repo.
 # The repo should hold only the port's own source code; players supply their own copy of the game
-# (the launcher rips it from their disc into %LOCALAPPDATA%\ISpySpookyMansionPort).
+# (the launcher rips it from their disc into %LOCALAPPDATA%\ISpySpookyMansionArchipelago).
 # ============================================================================================
 
-# --- saves & per-user state (saves now live in %LOCALAPPDATA%\ISpySpookyMansionPort\SAVED GAMES) ---
+# --- saves & per-user state (saves now live in %LOCALAPPDATA%\ISpySpookyMansionArchipelago\SAVED GAMES) ---
 SAVED GAMES/
 *.LST
 *.VER
@@ -38,9 +38,9 @@ Members.csv
 *.smk
 *.mov
 
-# --- artwork for the 'Choose an Ending' screen: it is cut from the game's own images (backdrop, title
-#     graphics, button art), so it stays local.  The picker skips itself if this folder is missing. ---
-Version Picker/
+# Build and test stuff
+build_smd_ap.bat
+tests/
 
 # --- third-party tools / binaries ---
 *.exe

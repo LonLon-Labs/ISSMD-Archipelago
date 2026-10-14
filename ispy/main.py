@@ -26,6 +26,11 @@ def main(argv=None):
     rt.load_data(a.data)
     rt.init_pygame(headless=a.report)
     movie.INIT_MAIN()
+    try:
+        from .ap import hooks
+        hooks.install(rt)             # Archipelago: pump/overlay + in-game hooks (no-op until a slot connects)
+    except Exception as e:            # noqa: BLE001  AP must never stop the game from starting
+        print('[ap] hooks not installed:', e)
 
     if a.report:
         import time

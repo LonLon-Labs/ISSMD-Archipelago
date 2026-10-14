@@ -28,11 +28,11 @@ def _app_data_root():
         base = os.environ.get('LOCALAPPDATA') or os.path.join(os.path.expanduser('~'), 'AppData', 'Local')
     else:
         base = os.environ.get('XDG_DATA_HOME') or os.path.join(os.path.expanduser('~'), '.local', 'share')
-    return os.path.join(base, 'ISpySpookyMansionPort')
+    return os.path.join(base, 'ISpySpookyMansionArchipelago')
 
 
 def asset_dirs():
-    """Folders searched for the artwork, in order: the app-data folder (e.g. %LOCALAPPDATA%\\ISpySpookyMansionPort\\
+    """Folders searched for the artwork, in order: the app-data folder (e.g. %LOCALAPPDATA%\\ISpySpookyMansionArchipelago\\
     Version Picker), then the folder next to the code (the repo's ispy_port\\Version Picker)."""
     return [os.path.join(_app_data_root(), FOLDER_NAME), ASSET_DIR]
 
