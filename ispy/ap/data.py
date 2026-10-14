@@ -40,7 +40,7 @@ CLUE_COUNT = {
 # Friendly names are best guesses (only the labels change if you edit them; the codes are what the game uses).
 ROOM_LABEL = {
     'fp': 'Fireplace', 'KT': 'Kitchen', 'ba': 'Bathroom', 'AR': 'Armoire', 'CH': 'Chest',
-    'BK': 'Bookshelf', 'MG': 'Magnifying Glass', 'AT': 'Attic', 'KY': 'Cabinet', 'CL': 'Clock',
+    'BK': 'Bookshelf', 'MG': 'Magnifying Glass', 'AT': 'Attic', 'KY': 'Key Cabinet', 'CL': 'Clock',
     'PL': 'Dining Table', 'WI': 'Window', 'IW': 'Workshop', 'SS': 'Study',
     'MT': 'Mystery Bins', 'CC': 'Creepy Collections',
 }
