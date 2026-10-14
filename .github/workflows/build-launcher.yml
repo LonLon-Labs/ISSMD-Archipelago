@@ -1,6 +1,7 @@
-# Builds the launcher for every target on a matching machine (PyInstaller can't cross-compile).
-# Run it from the Actions tab ("Run workflow"), or push a tag like v1.0 to also publish a GitHub release.
-name: Build launcher
+# Builds the launcher for every target on a matching machine (PyInstaller can't cross-compile) and packs the
+# Archipelago world (ispy_spooky_mansion.apworld).
+# Run it from the Actions tab ("Run workflow"), or push a tag like v1.0 to also publish a GitHub release with both.
+name: Build launcher and APWorld
 
 on:
   workflow_dispatch:
@@ -44,9 +45,31 @@ jobs:
           path: ${{ matrix.upload }}
           if-no-files-found: error
 
+  apworld:
+    name: APWorld
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Check the world compiles
+        run: python -m compileall -q APWorld/ispy_spooky_mansion
+
+      - name: Build
+        run: python build_apworld.py --no-install
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: apworld
+          path: release/ispy_spooky_mansion.apworld    # keep this exact name: Archipelago needs it to match the folder
+          if-no-files-found: error
+
   release:
     if: github.ref_type == 'tag'
-    needs: build
+    needs: [build, apworld]
     runs-on: ubuntu-latest
     permissions:
       contents: write
