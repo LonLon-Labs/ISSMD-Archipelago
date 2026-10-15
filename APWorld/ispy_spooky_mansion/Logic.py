@@ -111,8 +111,9 @@ def room_requirements(ending, room, mapping, door_locks, riddle_lock, assignment
         door = D.DOOR_BY_DESTINATION.get(clicked)
         if door_locks and door:
             req.add(D.door_key_name(door))
-        # Mystery Bins / Creepy Collections (the minigames) are never locked, whichever button leads to them
-        if riddle_lock and clicked in D.RIDDLE_ROOMS_BY_ENDING[ending] and room in D.RIDDLE_ROOMS_BY_ENDING[ending]:
+        # The lock belongs to the SPOT that is clicked, whatever entrance rando put behind it (a riddle spot that now leads
+        # to a minigame still needs its unlock).  The Mystery Bins / Creepy Collections spots themselves are never locked.
+        if riddle_lock and clicked in D.RIDDLE_ROOMS_BY_ENDING[ending]:
             req.add(D.unlock_item_name(clicked, ending))
         return frozenset(req)
     return frozenset()

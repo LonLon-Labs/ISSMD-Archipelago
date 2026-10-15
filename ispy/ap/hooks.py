@@ -339,8 +339,6 @@ def _nav_hook(is_door):
                 # sends you or whatever riddle riddle rando put there
                 new = st.redirect(ver, str(dest)) if ver else str(dest)
                 room = _riddle_room(ver, str(dest)) if ver else None
-                if room and not _riddle_room(ver, str(new or dest)):
-                    room = None                            # Mystery Bins / Creepy Collections are never locked
                 if room and not st.riddle_unlocked(ver, room):
                     session().show_locked('This riddle is locked', 'Find "%s"' % st.unlock_item_for(ver, room))
                     return True, None
