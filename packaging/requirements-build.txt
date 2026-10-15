@@ -5,4 +5,6 @@ pyinstaller>=6.10
 pygame-ce>=2.5.7
 pycdlib>=1.14
 pillow>=10        # lets PyInstaller turn icon.png into .ico / .icns
+certifi           # root certificates bundled into the app: the Archipelago client (wss://) needs them on machines where the
+                  # frozen Python can't use the OS trust store (CERTIFICATE_VERIFY_FAILED)
 # imageio-ffmpeg is installed separately by build.py (best effort) because it supplies the ffmpeg binary.

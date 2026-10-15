@@ -195,6 +195,7 @@ def pyinstaller(py, onefile, icon, ffmpeg):
            "--collect-submodules", "dirtools",
            "--collect-data", "ispy.ap",                          # riddle_clues.json lives inside the package
            "--collect-data", "pygame", "--collect-binaries", "pygame",
+           "--collect-data", "certifi",                           # cacert.pem for the Archipelago wss:// connection
            "--add-data", "%s%stools" % (ROOT / "tools" / "convert_data.py", sep),
            "--add-data", "%s%stools" % (ROOT / "tools" / "lingo_data.py", sep),
            "--icon", icon]
@@ -250,6 +251,23 @@ def build_windows(py, icon, ffmpeg, version):
     return [final]
 
 
+def make_dmg(stage, dmg, attempts=5):
+    """hdiutil fails now and then on CI runners with 'Resource busy' (Spotlight / a stale mount holds the folder).
+    Nothing is wrong with the build, so wait and try again."""
+    import time
+    for n in range(1, attempts + 1):
+        try:
+            run(["hdiutil", "create", "-volname", DISPLAY_NAME, "-srcfolder", stage, "-ov", "-format", "UDZO", dmg])
+            return
+        except subprocess.CalledProcessError:
+            if n == attempts:
+                raise
+            print("hdiutil failed (attempt %d of %d); retrying in %d s..." % (n, attempts, 10 * n), flush=True)
+            subprocess.run(["hdiutil", "detach", "/Volumes/" + DISPLAY_NAME, "-force"], capture_output=True)
+            Path(dmg).unlink(missing_ok=True)
+            time.sleep(10 * n)
+
+
 def build_macos(py, icon, ffmpeg, version):
     dist = pyinstaller(py, False, icon, ffmpeg)
     app = dist / (APP + ".app")
@@ -268,7 +286,7 @@ def build_macos(py, icon, ffmpeg, version):
     (stage / "Applications").symlink_to("/Applications")
     dmg = out_name(".dmg", version)
     dmg.unlink(missing_ok=True)
-    run(["hdiutil", "create", "-volname", DISPLAY_NAME, "-srcfolder", stage, "-ov", "-format", "UDZO", dmg])
+    make_dmg(stage, dmg)
 
     zipped = out_name(".app.zip", version)                       # a plain zip keeps the exec bits (for CI artifacts)
     zipped.unlink(missing_ok=True)
