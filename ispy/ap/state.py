@@ -34,6 +34,22 @@ class APState:
         self.riddle_seed = None               # riddle rando: the slot's seed ...
         self.riddle_map = {}                  # ... and the assignment dealt from it (frozen in the save)
         self.slot_riddle_map = {}             # riddle rando: the assignment the APWorld dealt (authoritative when present)
+        self.server_id = ''                   # which multiworld + slot the progress above belongs to
+
+    def bind_server(self, server_id):
+        """Tie this save's progress to one multiworld slot.  Connecting to a DIFFERENT one (another server, another seed,
+        another slot) starts that slot's progress from scratch, so nothing earned on the old one is sent to the new one.
+        Returns True when the progress was reset."""
+        reset = bool(self.server_id) and self.server_id != server_id
+        if reset:
+            self.received = []
+            self.checked = set()
+            self.matches = {}
+            self.plays = {}
+            self.filler_seen = 0
+            self.completed = []
+        self.server_id = server_id
+        return reset
 
     # ---- items -------------------------------------------------------------------------------------
     def apply_items(self, items, resync):
@@ -211,7 +227,7 @@ class APState:
                 'address': self.address, 'slot_name': self.slot_name, 'password': self.password,
                 'filler_seen': self.filler_seen, 'completed': self.completed, 'entrances': self.entrances,
                 'riddle_seed': self.riddle_seed, 'riddle_map': self.riddle_map,
-                'slot_riddle_map': self.slot_riddle_map}
+                'slot_riddle_map': self.slot_riddle_map, 'server_id': self.server_id}
 
     @classmethod
     def from_dict(cls, d):
@@ -232,6 +248,7 @@ class APState:
         s.riddle_seed = int(seed) if isinstance(seed, (int, float, str)) and str(seed).lstrip('-').isdigit() else None
         s.riddle_map = dict(d.get('riddle_map') or {})
         s.slot_riddle_map = dict(d.get('slot_riddle_map') or {})
+        s.server_id = str(d.get('server_id') or '')
         return s
 
     def save(self, path):

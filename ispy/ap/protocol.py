@@ -23,6 +23,18 @@ _GUID = '258EAFA5-E914-47DA-95CA-C5AB0DC85B11'
 OP_CONT, OP_TEXT, OP_BIN, OP_CLOSE, OP_PING, OP_PONG = 0x0, 0x1, 0x2, 0x8, 0x9, 0xA
 
 
+def _ssl_context():
+    """TLS context that verifies certificates.  Uses the OS trust store, plus certifi's bundle when it is installed
+    (some Python installs / frozen apps have no usable system roots).  Verification is never turned off."""
+    ctx = ssl.create_default_context()
+    try:
+        import certifi
+        ctx.load_verify_locations(cafile=certifi.where())
+    except Exception:                                      # noqa: BLE001  certifi missing or unreadable: system roots only
+        pass
+    return ctx
+
+
 # ---- WebSocket framing (pure) ----------------------------------------------------------------------------
 def encode_frame(opcode, payload=b'', mask=True):
     if isinstance(payload, str):
@@ -110,7 +122,7 @@ class WebSocket:
         host, port = u.hostname, u.port or (443 if secure else 80)
         raw = socket.create_connection((host, port), timeout=timeout)
         if secure:
-            raw = ssl.create_default_context().wrap_socket(raw, server_hostname=host)
+            raw = _ssl_context().wrap_socket(raw, server_hostname=host)
         key = base64.b64encode(os.urandom(16)).decode()
         path = (u.path or '/') + (('?' + u.query) if u.query else '')
         raw.sendall(('GET %s HTTP/1.1\r\nHost: %s:%d\r\nUpgrade: websocket\r\nConnection: Upgrade\r\n'
@@ -211,6 +223,7 @@ class APClient:
         self.slot_name = self.password = ''
         self.slot = None
         self.team = 0
+        self.seed_name = ''                # identifies the multiworld (from RoomInfo)
         self.slot_data = {}
         self.checked = set()
         self.missing = set()
@@ -254,19 +267,22 @@ class APClient:
         self.disconnect()
         self.slot_name, self.password = slot_name, password or ''
         self.state = 'connecting'
-        last = None
+        errors = []
         for url in self.candidate_urls(address):
             ws = self._factory()
             try:
                 ws.connect(url)
             except (OSError, ConnectionError, ssl.SSLError) as e:
-                last = e
+                errors.append('%s: %s' % (url.split('://', 1)[0], e))
                 continue
             self.ws = ws
             self._set_status('Connected to server, authenticating...')
             return True
         self.state = 'disconnected'
-        self._set_status('Could not connect: %s' % last)
+        # every attempt, not just the last: a TLS-only server makes the plain ws:// try fail with a misleading
+        # 'server closed during handshake' while the real problem (e.g. certificate verification) was the wss:// try
+        self._set_status('Could not connect: ' + ' | '.join(errors))
+        print('[ap] could not connect to %s: %s' % (address, ' | '.join(errors)))
         return False
 
     def disconnect(self):
@@ -344,6 +360,7 @@ class APClient:
     def handle_packet(self, pkt):
         cmd = pkt.get('cmd')
         if cmd == 'RoomInfo':
+            self.seed_name = str(pkt.get('seed_name') or '')
             self._send([self._connect_packet()])
         elif cmd == 'Connected':
             self.state = 'connected'

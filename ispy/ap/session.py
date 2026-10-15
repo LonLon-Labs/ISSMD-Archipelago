@@ -146,6 +146,12 @@ class Session:
 
     def _on_connected(self, slot_data):
         st = self.state
+        sid = '%s|%s|%s' % (self.client.seed_name or st.address.lower(), self.client.team, self.client.slot)
+        if st.bind_server(sid):
+            log('connected to a different multiworld / slot than this save was using: progress reset')
+            self.client.outbox.clear()                     # nothing earned on the old server goes to the new one
+            st.riddle_map = {}
+            self.toast('New server: starting this slot from scratch')
         st.options = APOptions.from_slot_data(slot_data.get('options', slot_data))
         st.entrances = slot_data.get('entrances') or {}
         seed = slot_data.get('riddle_seed')
